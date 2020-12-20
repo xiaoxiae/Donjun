@@ -1,0 +1,9 @@
+bin/
+obj/
+.idea
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+Donjun.sln.DotSettings.user
+Donjun.sln
+Donjun.csproj
