@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Donjun
 {
@@ -82,16 +81,16 @@ namespace Donjun
             }
         }
     }
-    
+
     class PathGenerator
     {
         public RoomCollection Rooms { get; set; }
         public int MinRoomEntrances { get; set; }
         public int MaxRoomEntrances { get; set; }
-        
+
         private (int, int)[] fourDirections = {(0, 1), (1, 0), (-1, 0), (0, -1)};
         private (int, int)[] eightDirections = {(0, 1), (1, 0), (-1, 0), (0, -1), (-1, -1), (1, 1), (-1, 1), (1, -1)};
-    
+
         /// <summary>
         /// Return True if a given point is equidistant to multiple rooms.
         ///
@@ -141,7 +140,6 @@ namespace Donjun
 
         /// <summary>
         /// Connect the specified room to one or more closest points on the path, returning the connection points.
-        /// TODO: parametrize connections
         /// </summary>
         private List<(int, int)> ConnectRoomToPath(Path path, Room room)
         {
@@ -317,22 +315,80 @@ namespace Donjun
             // clear dead ends
             ClearDeadEnds(path, xp, yp);
 
-            // TODO: remove this, just for debug
-            var writer = new StreamWriter("tmp.out");
-            for (int x = 0; x < Rooms.Width; x++)
-            {
-                for (int y = 0; y < Rooms.Height; y++)
-                {
-                    if (path.Contains(x, y)) writer.Write(".");
-                    else writer.Write(Rooms.IsRoom(x, y) ? "#" : " ");
-                }
+            return path;
+        }
+    }
 
-                writer.WriteLine();
+    class RoomLayoutGenerator
+    {
+        public Room Room { get; set; }
+
+        public List<List<Item>> Generate()
+        {
+            // TODO: actual implementation, this just create a container of the appropriate size, filled with air
+            var layout = new List<List<Item>>();
+
+            for (int i = 0; i < Room.Height; i++)
+            {
+                var list = new List<Item>();
+                for (int j = 0; j < Room.Width; j++)
+                    list.Add(Item.Air);
+
+                layout.Add(list);
             }
 
-            writer.Flush();
+            return layout;
+        }
+    }
 
-            return path;
+    /// <summary>
+    /// A parametrized random maze generator.
+    /// </summary>
+    class MazeGenerator
+    {
+        public int MazeWidth { get; set; }
+        public int MazeHeight { get; set; }
+        public int MinRoomSide { get; set; }
+        public int MaxRoomSide { get; set; }
+        public int RoomSpacing { get; set; }
+        public int MinRoomEntrances { get; set; }
+        public int MaxRoomEntrances { get; set; }
+
+        /// <summary>
+        /// Generate the maze.
+        ///
+        /// The algorithm works as follows:
+        /// (1) generate rectangular areas where the rooms are going to be
+        /// (2) connect these areas via paths and let them know where the entrances are (for generating the rooms)
+        /// (3) generate unique rooms in each of the rectangular areas
+        /// </summary>
+        public IMaze Generate()
+        {
+            // (1) generate rooms
+            RoomCollection roomCollection = new RoomCollectionGenerator
+            {
+                MazeWidth = MazeWidth,
+                MazeHeight = MazeHeight,
+                MinRoomSide = MinRoomSide,
+                MaxRoomSide = MaxRoomSide,
+                RoomSpacing = RoomSpacing
+            }.Generate();
+
+            // (2) generate the path, modifying the rooms in the process (adding entrances)
+            Path path = new PathGenerator
+            {
+                Rooms = roomCollection,
+                MinRoomEntrances = MinRoomEntrances,
+                MaxRoomEntrances = MaxRoomEntrances
+            }.Generate();
+
+            // (3)  generate the respective room layouts
+            foreach (var room in roomCollection.Rooms)
+            {
+                room.SetLayout(new RoomLayoutGenerator {Room = room}.Generate());
+            }
+
+            return new Maze(roomCollection, path);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Donjun
     {
         private Rectangle _room; // internally stored as a rectangle
         private List<(int, int)> _entrances; // entrances to the room
+        private List<List<Item>> _layout;
 
         public Room(int x, int y, int width, int height)
         {
@@ -46,19 +47,19 @@ namespace Donjun
         public int X
         {
             get => _room.X;
-            set => _room.X = value;
+            private set => _room.X = value;
         }
 
         public int Y
         {
             get => _room.Y;
-            set => _room.Y = value;
+            private set => _room.Y = value;
         }
 
         public int Width
         {
             get => _room.Width;
-            set
+            private set
             {
                 if (value <= 0) throw new ArgumentException();
                 _room.Width = value;
@@ -68,7 +69,7 @@ namespace Donjun
         public int Height
         {
             get => _room.Height;
-            set
+            private set
             {
                 if (value <= 0) throw new ArgumentException();
                 _room.Height = value;
@@ -124,11 +125,22 @@ namespace Donjun
         }
 
         /// <summary>
-        /// TODO
+        /// Return the item in the room.
+        /// Note that x and y are relative to the position of the room.
+        /// TODO: throw if out of bounds, since this shouldn't happen
         /// </summary>
         public Item At(int x, int y)
         {
-            throw new NotImplementedException();
+            return _layout[y][x];
+        }
+
+        /// <summary>
+        /// Set the layout of the room.
+        /// TODO: check size
+        /// </summary>
+        public void SetLayout(List<List<Item>> layout)
+        {
+            _layout = layout;
         }
     }
 
@@ -145,7 +157,7 @@ namespace Donjun
         /// <summary>
         /// The boundary in which all rooms have to reside.
         /// </summary>
-        public Rectangle Boundary { get; set; }
+        public Rectangle Boundary { get; }
 
         // the minimum number of empty spaces between each of the rooms
 
@@ -204,11 +216,12 @@ namespace Donjun
         }
 
         /// <summary>
-        /// TODO
+        /// If it intersects a room, return the value at it, else Nothing.
         /// </summary>
         public Item At(int x, int y)
         {
-            throw new NotImplementedException();
+            var room = RoomAt(x, y);
+            return room?.At(x - room.X, y - room.Y) ?? Item.Nothing;
         }
     }
 }

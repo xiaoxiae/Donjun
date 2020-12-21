@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Donjun
 {
@@ -14,7 +12,7 @@ namespace Donjun
         /// <summary>
         /// Return empty if the given coordinate is on a path, else return a wall.
         /// </summary>
-        public Item At(int x, int y) => _pathPoints.Contains((x, y)) ? Item.Empty : Item.Wall;
+        public Item At(int x, int y) => _pathPoints.Contains((x, y)) ? Item.Air : Item.Nothing;
 
         /// <summary>
         /// Add a point to path.

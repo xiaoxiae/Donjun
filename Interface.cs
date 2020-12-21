@@ -9,7 +9,7 @@ namespace Donjun
 
         public int Height { get; }
     }
-   
+
     /// <summary>
     /// Something for which it makes sense to ask "what is at this position?"
     /// </summary>
@@ -17,10 +17,9 @@ namespace Donjun
     {
         public Item At(int x, int y);
     }
-    
+
     /// <summary>
     /// An interface for a maze. It has to both have given bounds and return items at the given positions.
     /// </summary>
     interface IMaze : IAttable, IBoundable { }
-    
 }

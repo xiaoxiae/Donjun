@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System;
+using CommandLine;
 
 
 namespace Donjun
@@ -21,7 +22,16 @@ namespace Donjun
                         MaxRoomEntrances = options.MaxRoomEntrances,
                     };
 
-                    rmg.Generate();
+                    var maze = rmg.Generate();
+
+                    // print out the dungeon
+                    int offset = 1;
+                    for (int y = -offset; y < maze.Height + offset; y++)
+                    {
+                        for (int x = -offset; x < maze.Width + offset; x++)
+                            Console.Write((char) maze.At(x, y));
+                        Console.WriteLine();
+                    }
                 });
         }
     }
