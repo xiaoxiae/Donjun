@@ -16,7 +16,7 @@ namespace Donjun
         Left = 2,
         Down = 3
     }
-    
+
     /// <summary>
     /// A single room in the maze.
     /// </summary>
@@ -37,9 +37,24 @@ namespace Donjun
         }
 
         /// <summary>
+        /// Add an entrance to the room.
+        /// Note that the point has to be right on the boundary of the room.
+        /// TODO: add a check for that
+        /// </summary>
+        public void AddEntrance(int x, int y)
+        {
+            entrances.Add((x, y));
+        }
+
+        /// <summary>
         /// Returns the rectangle encapsulating the entire room.
         /// </summary>
-        public Rectangle Boundary() => _room;
+        public Rectangle Boundary => _room;
+
+        /// <summary>
+        /// Return True if the room contains the given point.
+        /// </summary>
+        public bool Contains(int x, int y) => Boundary.Contains(x, y);
 
         public int X
         {
@@ -139,10 +154,11 @@ namespace Donjun
         /// <summary>
         /// Return true if this room intersects another.
         /// </summary>
+        /// TODO: maybe unused?
         /// <param name="other">The room to check against.</param>
         /// <param name="spacing">Additional number of spaces that have to separate the rooms. Defaults to 0.</param>
         public bool Intersects(Room other, int spacing = 0)
-            => other.Boundary().IntersectsWith(Rectangle.Inflate(Boundary(), spacing, spacing));
+            => other.Boundary.IntersectsWith(Rectangle.Inflate(Boundary, spacing, spacing));
 
         /// <summary>
         /// Split the room into two, horizontally.
@@ -186,16 +202,16 @@ namespace Donjun
             return (bottom, top);
         }
     }
-    
+
     /// <summary>
     /// A collection of rooms.
     /// </summary>
     class RoomCollection
     {
-        private readonly List<Room> _rooms = new List<Room>();
+        public readonly List<Room> Rooms = new List<Room>();
 
         // the boundary in which all rooms have to reside
-        private Rectangle Boundary { get; set; }
+        public Rectangle Boundary { get; set; }
 
         // the minimum number of empty spaces between each of the rooms
         private readonly int _roomSpacing;
@@ -211,7 +227,7 @@ namespace Donjun
         /// </summary>
         public void AddRoom(Room room)
         {
-            _rooms.Add(room);
+            Rooms.Add(room);
         }
 
         /// <summary>
@@ -219,21 +235,54 @@ namespace Donjun
         /// </summary>
         public void RemoveRoom(Room room)
         {
-            _rooms.Remove(room);
+            Rooms.Remove(room);
+        }
+
+        /// <summary>
+        /// The width of the room collection.
+        /// </summary>
+        public int Width => Boundary.Width;
+
+        /// <summary>
+        /// The height of the room collection.
+        /// </summary>
+        public int Height => Boundary.Width;
+
+        /// <summary>
+        /// Return True if the specified coordinate does not intersect a room.
+        /// </summary>
+        public bool Free(int x, int y) => RoomAt(x, y) == null;
+
+        /// <summary>
+        /// Return the room at the given coordinates. If no such room exists, return null.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public Room? RoomAt(int x, int y)
+        {
+            var room = new Room(x, y, 1, 1);
+
+            foreach (var other in Rooms)
+                if (room.Intersects(other))
+                    return other;
+
+            return null;
         }
 
         /// <summary>
         /// Return true if a room can be placed in this room collection without being outside bounds or intersecting
         /// other rooms, else false.
+        /// TODO: maybe unused?
         /// </summary>
-        public bool CanContain(Room room)
+        public bool CanContain(Room room, bool accountForSpacing = false)
         {
             // the room must be contained within the room boundary
-            if (!Boundary.Contains(room.Boundary())) return false;
+            if (!Boundary.Contains(room.Boundary)) return false;
 
             // check intersection with other rooms
-            foreach (var other in _rooms)
-                if (room.Intersects(other, _roomSpacing))
+            foreach (var other in Rooms)
+                if (room.Intersects(other, accountForSpacing ? _roomSpacing : 0))
                     return false;
 
             return true;
@@ -247,14 +296,14 @@ namespace Donjun
         {
             StringBuilder sb = new StringBuilder();
 
-            for (int x = 0; x < Boundary.Width; x++)
+            for (int x = 0; x < Width; x++)
             {
-                for (int y = 0; y < Boundary.Height; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     char c = (char) Item.Empty;
-                    foreach (var room in _rooms)
+                    foreach (var room in Rooms)
                     {
-                        if (room.Boundary().Contains(x, y)) c = (char) Item.Wall;
+                        if (room.Boundary.Contains(x, y)) c = (char) Item.Wall;
                     }
 
                     sb.Append(c);
