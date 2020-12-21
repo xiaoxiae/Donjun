@@ -1,9 +1,7 @@
+# generated
 bin/
 obj/
+
+# IDE
 .idea
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
 Donjun.sln.DotSettings.user
-Donjun.sln
-Donjun.csproj
