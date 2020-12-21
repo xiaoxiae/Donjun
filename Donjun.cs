@@ -14,13 +14,12 @@ namespace Donjun
                     {
                         MazeWidth = options.Width,
                         MazeHeight = options.Height,
-                        MinimumRoomWidth = options.MinimumRoomWidth,
-                        MinimumRoomHeight = options.MinimumRoomHeight,
-                        MaximumRoomWidth = options.MaximumRoomWidth,
-                        MaximumRoomHeight = options.MaximumRoomHeight
+                        MinRoomSide = options.MinRoomSide,
+                        MaxRoomSide = options.MaxRoomSide,
+                        RoomSpacing = options.RoomSpacing
                     };
 
-                    rmg.GenerateMaze();
+                    rmg.Generate();
                 });
         }
     }

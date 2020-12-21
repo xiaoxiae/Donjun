@@ -10,16 +10,13 @@ namespace Donjun
         [Option('h', "height", Default = 50, HelpText = "The height of the generated maze.")]
         public int Height { get; set; }
 
-        [Option("min-room-width", Default = 5, HelpText = "The minimum width a room can have.")]
-        public int MinimumRoomWidth { get; set; }
+        [Option("min-room-side", Default = 5, HelpText = "The minimum width/height a room can have.")]
+        public int MinRoomSide { get; set; }
 
-        [Option("min-room-height", Default = 5, HelpText = "The minimum height a room can have.")]
-        public int MinimumRoomHeight { get; set; }
+        [Option("max-room-side", Default = 20, HelpText = "The maximum width/height a room can have.")]
+        public int MaxRoomSide { get; set; }
 
-        [Option("max-room-width", Default = 20, HelpText = "The maximum width a room can have.")]
-        public int MaximumRoomWidth { get; set; }
-
-        [Option("max-room-height", Default = 20, HelpText = "The maximum height a room can have.")]
-        public int MaximumRoomHeight { get; set; }
+        [Option("room-spacing", Default = 3, HelpText = "The distances between the rooms. Must be an odd number.")]
+        public int RoomSpacing { get; set; }
     }
 }
