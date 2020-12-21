@@ -89,13 +89,14 @@ namespace Donjun
         }
 
         /// <summary>
-        /// Connect the specified room to one or more closest points on the path.
+        /// Connect the specified room to one or more closest points on the path, returning the connection points.
         /// </summary>
-        private void ConnectRoomToPath(Room room, int minConnections = 1, int maxConnections = 4)
+        private List<(int, int)> ConnectRoomToPath(Room room, int minConnections = 1, int maxConnections = 4)
         {
             // the number of connections to the path
             Random random = new Random();
             int connections = random.Next(minConnections, maxConnections);
+            var connectionPoints = new List<(int, int)>();
 
             for (int _ = 0; _ < connections; _++)
             {
@@ -112,10 +113,13 @@ namespace Donjun
                 {
                     (int x, int y) = queue.Dequeue();
 
+                    // backtrack when the connection is found
                     if (_pathPoints.Contains((x, y)))
                     {
                         int xc = x;
                         int yc = y;
+
+                        connectionPoints.Add((xc, yc));
 
                         while (!room.Contains(xc, yc))
                         {
@@ -141,8 +145,85 @@ namespace Donjun
                     }
                 }
             }
+
+            return connectionPoints;
         }
 
+        private void ClearDeadEnds(int xs, int ys, RoomCollection rooms)
+        {
+            var queue = new Queue<(int, int)>();
+            queue.Enqueue((xs, ys));
+
+            var explored = new Dictionary<(int, int), List<(int, int)>>();
+            var dangling = new Queue<(int, int)>();
+
+            // create an oriented graph using BFS
+            while (queue.Count != 0)
+            {
+                (int x, int y) = queue.Dequeue();
+                explored[(x, y)] = new List<(int, int)>();
+
+                // add neighbours
+                foreach ((int xd, int yd) in fourDirections)
+                {
+                    int xn = x + xd, yn = y + yd;
+
+                    // skip non-path points and those that were explored
+                    if (!_pathPoints.Contains((xn, yn)) || explored.ContainsKey((xn, yn)))
+                        continue;
+
+                    explored[(x, y)].Add((xn, yn));
+                    queue.Enqueue((xn, yn));
+                }
+
+                // if it is dangling and isn't connected to a room, remove it
+                if (explored[(x, y)].Count == 0)
+                {
+                    bool found = false;
+                    foreach ((int xd, int yd) in fourDirections)
+                        if (!rooms.Free(x + xd, y + yd))
+                        {
+                            found = true;
+                            break;
+                        }
+
+                    if (!found)
+                        dangling.Enqueue((x, y));
+                }
+            }
+
+            while (dangling.Count != 0)
+            {
+                (int x, int y) = dangling.Dequeue();
+                _pathPoints.Remove((x, y));
+
+                foreach ((int xd, int yd) in fourDirections)
+                {
+                    int xn = x + xd, yn = y + yd;
+
+                    if (explored.ContainsKey((xn, yn)))
+                    {
+                        if (explored[(xn, yn)].Contains((x, y)))
+                            explored[(xn, yn)].Remove((x, y));
+
+                        if (explored[(xn, yn)].Count == 0)
+                        {
+                            explored.Remove((xn, yn));
+                            dangling.Enqueue((xn, yn));
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Generate the path between the rooms in the maze.
+        ///
+        /// The algorithm works as follows:
+        /// (1) mark all points that are the same distance to more than one room to be on the path
+        /// (2) connect all rooms to the path using one or more connections
+        /// (3) cut off dead ends
+        /// </summary>
         public MazePath(RoomCollection rooms)
         {
             _pathPoints = new HashSet<(int, int)>();
@@ -151,15 +232,25 @@ namespace Donjun
             var writer = new StreamWriter("tmp.out");
 
             // add equidistant points to rooms
-            const int offset = 0;
-            for (int x = offset; x < rooms.Width - offset; x++)
-                for (int y = offset; y < rooms.Height - offset; y++)
+            for (int x = 0; x < rooms.Width; x++)
+                for (int y = 0; y < rooms.Height; y++)
                     if (IsEquidistantToMultipleRooms(x, y, rooms))
                         _pathPoints.Add((x, y));
 
             // connect rooms to the path
-            foreach (var room in rooms.Rooms) ConnectRoomToPath(room);
+            // also save some point on the path that we definitely don't want to remove (is not a dead end)
+            int xp = -1, yp = -1;
+            foreach (var room in rooms.Rooms)
+            {
+                var points = ConnectRoomToPath(room);
 
+                if (xp == -1) (xp, yp) = points[0];
+            }
+
+            // clear dead ends
+            ClearDeadEnds(xp, yp, rooms);
+
+            // TODO: remove this, just for debug
             for (int x = 0; x < rooms.Width; x++)
             {
                 for (int y = 0; y < rooms.Height; y++)
@@ -192,7 +283,7 @@ namespace Donjun
         /// <summary>
         /// Generate the maze.
         ///
-        /// THe algorithm works as follows:
+        /// The algorithm works as follows:
         /// (1) generate rectangular areas where the rooms are going to be
         /// (2) connect these areas via paths and let them know where the entrances are (for generating the rooms)
         /// (3) generate unique rooms in each of the rectangular areas
