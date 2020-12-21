@@ -21,6 +21,8 @@ namespace Donjun
         public int MinRoomSide { get; set; }
         public int MaxRoomSide { get; set; }
         public int RoomSpacing { get; set; }
+        public int MinRoomEntrances { get; set; }
+        public int MaxRoomEntrances { get; set; }
 
         /// <summary>
         /// Generate the maze.
@@ -44,9 +46,14 @@ namespace Donjun
             }.Generate();
 
             // (2) generate the path, modifying the rooms in the process (adding entrances)
-            Path path = new PathGenerator {Rooms = rooms}.Generate();
+            Path path = new PathGenerator
+            {
+                Rooms = rooms,
+                MinRoomEntrances = MinRoomEntrances,
+                MaxRoomEntrances = MaxRoomEntrances
+            }.Generate();
 
-            // (3) 
+            // (3)  generate the respective rooms
             // TODO: generate the respective rooms
 
             // TODO: concrete maze class implementation

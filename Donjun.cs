@@ -16,7 +16,9 @@ namespace Donjun
                         MazeHeight = options.Height,
                         MinRoomSide = options.MinRoomSide,
                         MaxRoomSide = options.MaxRoomSide,
-                        RoomSpacing = options.RoomSpacing
+                        RoomSpacing = options.RoomSpacing,
+                        MinRoomEntrances = options.MinRoomEntrances,
+                        MaxRoomEntrances = options.MaxRoomEntrances,
                     };
 
                     rmg.Generate();

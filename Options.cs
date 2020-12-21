@@ -2,6 +2,7 @@ using CommandLine;
 
 namespace Donjun
 {
+    // TODO: convert to pairs (w,h; min,max...)
     class Options
     {
         [Option('w', "width", Default = 50, HelpText = "The width of the generated maze.")]
@@ -18,5 +19,11 @@ namespace Donjun
 
         [Option("room-spacing", Default = 3, HelpText = "The distances between the rooms. Must be an odd number.")]
         public int RoomSpacing { get; set; }
+        
+        [Option("min-room-entrances", Default = 1, HelpText = "The minimum number of entrances a room can have.")]
+        public int MinRoomEntrances { get; set; }
+        
+        [Option("max-room-entrances", Default = 3, HelpText = "The maximum number of entrances a room can have.")]
+        public int MaxRoomEntrances { get; set; }
     }
 }

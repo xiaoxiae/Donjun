@@ -86,6 +86,8 @@ namespace Donjun
     class PathGenerator
     {
         public RoomCollection Rooms { get; set; }
+        public int MinRoomEntrances { get; set; }
+        public int MaxRoomEntrances { get; set; }
         
         private (int, int)[] fourDirections = {(0, 1), (1, 0), (-1, 0), (0, -1)};
         private (int, int)[] eightDirections = {(0, 1), (1, 0), (-1, 0), (0, -1), (-1, -1), (1, 1), (-1, 1), (1, -1)};
@@ -141,11 +143,11 @@ namespace Donjun
         /// Connect the specified room to one or more closest points on the path, returning the connection points.
         /// TODO: parametrize connections
         /// </summary>
-        private List<(int, int)> ConnectRoomToPath(Path path, Room room, int minConnections = 1, int maxConnections = 4)
+        private List<(int, int)> ConnectRoomToPath(Path path, Room room)
         {
             // the number of connections to the path
             Random random = new Random();
-            int connections = random.Next(minConnections, maxConnections);
+            int connections = random.Next(MinRoomEntrances, MaxRoomEntrances);
             var connectionPoints = new List<(int, int)>();
 
             for (int _ = 0; _ < connections; _++)
