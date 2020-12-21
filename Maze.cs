@@ -154,10 +154,13 @@ namespace Donjun
             var queue = new Queue<(int, int)>();
             queue.Enqueue((xs, ys));
 
+            // TODO: some of the paths that cause cycles aren't generated properly
+            // not a program-breaking bug but a little annoying
+
             var explored = new Dictionary<(int, int), List<(int, int)>>();
             var dangling = new Queue<(int, int)>();
 
-            // create an oriented graph using BFS
+            // create a DAG using BFS
             while (queue.Count != 0)
             {
                 (int x, int y) = queue.Dequeue();
@@ -169,29 +172,38 @@ namespace Donjun
                     int xn = x + xd, yn = y + yd;
 
                     // skip non-path points and those that were explored
-                    if (!_pathPoints.Contains((xn, yn)) || explored.ContainsKey((xn, yn)))
+                    if (!_pathPoints.Contains((xn, yn)))
                         continue;
 
-                    explored[(x, y)].Add((xn, yn));
-                    queue.Enqueue((xn, yn));
+                    // possibly connect to already explored path, if it isn't the previous one
+                    if (!explored.ContainsKey((xn, yn)) || !explored[(xn, yn)].Contains((x, y)))
+                        explored[(x, y)].Add((xn, yn));
+
+                    // if it hasn't been explored yet, explore
+                    if (!explored.ContainsKey((xn, yn)))
+                        queue.Enqueue((xn, yn));
                 }
 
-                // if it is dangling and isn't connected to a room, remove it
+                // if it is dangling (isn't connected to a room and no other path), remove it
                 if (explored[(x, y)].Count == 0)
                 {
                     bool found = false;
                     foreach ((int xd, int yd) in fourDirections)
+                    {
                         if (!rooms.Free(x + xd, y + yd))
                         {
                             found = true;
                             break;
                         }
+                    }
 
                     if (!found)
                         dangling.Enqueue((x, y));
                 }
             }
 
+            // remove the dangling bits by stripping them, removing them as sons
+            // from other vertices and possibly adding those
             while (dangling.Count != 0)
             {
                 (int x, int y) = dangling.Dequeue();
@@ -201,11 +213,14 @@ namespace Donjun
                 {
                     int xn = x + xd, yn = y + yd;
 
+                    // find all predecessors that contain (x, y)
                     if (explored.ContainsKey((xn, yn)))
                     {
+                        // remove it
                         if (explored[(xn, yn)].Contains((x, y)))
                             explored[(xn, yn)].Remove((x, y));
 
+                        // if this reduced the successors to 0, enqueue it
                         if (explored[(xn, yn)].Count == 0)
                         {
                             explored.Remove((xn, yn));
