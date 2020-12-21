@@ -10,10 +10,10 @@ namespace Donjun
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(options =>
                 {
-                    var rmg = new RandomMazeGenerator
+                    var rmg = new MazeGenerator
                     {
-                        Width = options.Width,
-                        Height = options.Height,
+                        MazeWidth = options.Width,
+                        MazeHeight = options.Height,
                         MinimumRoomWidth = options.MinimumRoomWidth,
                         MinimumRoomHeight = options.MinimumRoomHeight,
                         MaximumRoomWidth = options.MaximumRoomWidth,
