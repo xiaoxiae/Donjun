@@ -10,28 +10,18 @@ namespace Donjun
     class Room : IBoundable, IAttable
     {
         private Rectangle _room; // internally stored as a rectangle
-        private List<(int, int)> _entrances; // entrances to the room
+        public List<(int, int)> Entrances; // entrances to the room
         private List<List<Item>> _layout;
 
         public Room(int x, int y, int width, int height)
         {
             _room = new Rectangle();
-            _entrances = new List<(int, int)>();
+            Entrances = new List<(int, int)>();
 
             X = x;
             Y = y;
             Width = width;
             Height = height;
-        }
-
-        /// <summary>
-        /// Add an entrance to the room.
-        /// Note that the point has to be right on the boundary of the room.
-        /// TODO: add a check for that ^
-        /// </summary>
-        public void AddEntrance(int x, int y)
-        {
-            _entrances.Add((x, y));
         }
 
         /// <summary>
@@ -192,6 +182,14 @@ namespace Donjun
         /// The height of the room collection.
         /// </summary>
         public int Height => Boundary.Width;
+
+        /// <summary>
+        /// Return True if the specified coordinate is an entrance to some room.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool IsEntrance(int x, int y) => IsRoom(x, y) && RoomAt(x, y).Entrances.Contains((x, y));
 
         /// <summary>
         /// Return True if the specified coordinate does not intersect a room.

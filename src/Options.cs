@@ -20,13 +20,13 @@ namespace Donjun
         [Option("max-room-side", Default = 20, HelpText = "The maximum width/height a room can have.")]
         public int MaxRoomSide { get; set; }
 
-        [Option("room-spacing", Default = 3, HelpText = "The distances between the rooms. Must be an odd number.")]
+        [Option("room-spacing", Default = 1, HelpText = "The distances between the rooms. Must be an odd number.")]
         public int RoomSpacing { get; set; }
 
         [Option("min-room-entrances", Default = 1, HelpText = "The minimum number of entrances a room can have.")]
         public int MinRoomEntrances { get; set; }
 
-        [Option("max-room-entrances", Default = 3, HelpText = "The maximum number of entrances a room can have.")]
+        [Option("max-room-entrances", Default = 2, HelpText = "The maximum number of entrances a room can have.")]
         public int MaxRoomEntrances { get; set; }
     }
 }

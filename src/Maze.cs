@@ -6,8 +6,10 @@ namespace Donjun
     enum Item
     {
         Air = ' ',
-        Wall = '#',
-        Nothing = 'X',
+        Wall = '█',
+        Water = '~',
+        Column = 'o',
+        Nothing = '?',
     }
 
     class Maze : IMaze
