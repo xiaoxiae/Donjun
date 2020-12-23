@@ -197,11 +197,94 @@ namespace Donjun
         }
 
         /// <summary>
-        /// Remove dead ends using a BFS, starting from the provided coordinates.
+        /// Remove dead ends.
+        /// 
+        /// The algorithm works as follows:
+        /// (1) create a DAG out of the path using BFS (orient by layers), starting at the specified coordinates
+        /// (2) add vertices of deg_out 0 to be "dangling"
+        /// (3) start removing the "dangling" vertices iteratively, not doing so when:
+        ///     a) the vertex is adjacent to a room entrance
+        ///     b) two or more vertices point at the vertex being removed
         /// </summary>
         private void ClearDeadEnds(Path path, int xs, int ys)
         {
-            // TODO: re-write, the algorithm was broken
+            var queue = new Queue<(int, int)>();
+            queue.Enqueue((xs, ys));
+
+            // denote the neighbours of each vertex
+            var explored = new Dictionary<(int, int), List<(int, int)>>();
+            var dangling = new Queue<(int, int)>();
+
+            // create a DAG using BFS
+            while (queue.Count != 0)
+            {
+                (int x, int y) = queue.Dequeue();
+                explored[(x, y)] = new List<(int, int)>();
+
+                // add neighbours
+                foreach ((int xd, int yd) in Constant.ManhattanDeltas)
+                {
+                    int xn = x + xd, yn = y + yd;
+
+                    // skip non-path points
+                    if (!path.Contains(xn, yn))
+                        continue;
+
+                    // possibly connect to either an unexplored path, or to not previous path
+                    if (!explored.ContainsKey((xn, yn)) || !explored[(xn, yn)].Contains((x, y)))
+                        explored[(x, y)].Add((xn, yn));
+
+                    // if it hasn't been explored yet, explore it
+                    if (!explored.ContainsKey((xn, yn)))
+                        queue.Enqueue((xn, yn));
+                }
+
+                // if it is dangling (has deg_out == 0)
+                if (explored[(x, y)].Count == 0)
+                    dangling.Enqueue((x, y));
+            }
+
+            // remove the dangling bits by stripping them
+            while (dangling.Count != 0)
+            {
+                (int x, int y) = dangling.Dequeue();
+
+                // see if there is an adjacent wall
+                bool found = false;
+                foreach ((int xd, int yd) in Constant.ManhattanDeltas)
+                {
+                    int xn = x + xd, yn = y + yd;
+
+                    if (Rooms.IsEntrance(xn, yn))
+                        found = true;
+                }
+
+                if (found)
+                    continue;
+
+                Queue<(int, int)> contained = new Queue<(int, int)>();
+                foreach ((int xd, int yd) in Constant.ManhattanDeltas)
+                {
+                    int xn = x + xd, yn = y + yd;
+
+                    // find all predecessors that contain (x, y) and remove (x, y) from it
+                    if (explored.ContainsKey((xn, yn)) && explored[(xn, yn)].Contains((x, y)))
+                    {
+                        explored[(xn, yn)].Remove((x, y));
+                        contained.Enqueue((xn, yn));
+                    }
+                }
+
+                if (contained.Count != 1)
+                    continue;
+
+                path.Remove(x, y);
+
+                (int xc, int yc) = contained.Dequeue();
+
+                if (explored[(xc, yc)].Count == 0)
+                    dangling.Enqueue((xc, yc));
+            }
         }
 
         /// <summary>
