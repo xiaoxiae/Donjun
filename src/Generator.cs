@@ -88,9 +88,6 @@ namespace Donjun
         public int MinRoomEntrances { get; set; }
         public int MaxRoomEntrances { get; set; }
 
-        private (int, int)[] fourDirections = {(0, 1), (1, 0), (-1, 0), (0, -1)};
-        private (int, int)[] eightDirections = {(0, 1), (1, 0), (-1, 0), (0, -1), (-1, -1), (1, 1), (-1, 1), (1, -1)};
-
         /// <summary>
         /// Return True if a given point is equidistant to multiple rooms.
         ///
@@ -115,7 +112,7 @@ namespace Donjun
                 (int d, int xc, int yc) = queue.Dequeue();
                 explored.Add((xc, yc));
 
-                foreach ((int xd, int yd) in eightDirections)
+                foreach ((int xd, int yd) in Constant.DiagonalDeltas)
                 {
                     int xn = xc + xd, yn = yc + yd;
 
@@ -181,7 +178,7 @@ namespace Donjun
                         break;
                     }
 
-                    foreach ((int xd, int yd) in fourDirections)
+                    foreach ((int xd, int yd) in Constant.ManhattanDeltas)
                     {
                         int xn = x + xd, yn = y + yd;
 
@@ -353,8 +350,7 @@ namespace Donjun
                     || x == Room.Width - 1 && y == 0
                     || x == Room.Width - 1 && y == Room.Height - 1)
                 {
-                    // TODO: global constant
-                    foreach ((int xd, int yd) in new[] {(0, 1), (1, 0), (-1, 0), (0, -1)})
+                    foreach ((int xd, int yd) in Constant.ManhattanDeltas)
                     {
                         int xn = x + xd, yn = y + yd;
 
@@ -420,11 +416,10 @@ namespace Donjun
 
                             layout[y][x] = Item.Air;
 
-                            // TODO: global constant
-                            foreach ((int xd, int yd) in new[] {(0, 1), (1, 0), (-1, 0), (0, -1)})
+                            foreach ((int xd, int yd) in Constant.ManhattanDeltas)
                             {
                                 int xn = x + xd, yn = y + yd;
-                                
+
                                 // skip explored
                                 if (explored.Contains((xn, yn)))
                                     continue;
