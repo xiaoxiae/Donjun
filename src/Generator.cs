@@ -218,9 +218,9 @@ namespace Donjun
 
             // add equidistant points to rooms
             for (int x = 0; x < Rooms.Width; x++)
-            for (int y = 0; y < Rooms.Height; y++)
-                if (IsEquidistantToMultipleRooms(x, y))
-                    path.Add(x, y);
+                for (int y = 0; y < Rooms.Height; y++)
+                    if (IsEquidistantToMultipleRooms(x, y))
+                        path.Add(x, y);
 
             // connect rooms to the path
             // also save some point on the path that we definitely don't want to remove (is not a dead end)
@@ -365,15 +365,15 @@ namespace Donjun
                 case Layout.Regular: // do nothing extra
                     break;
                 case Layout.Lake:
-                    const int lakeOffset = 2; // TODO: change depending on size?
+                    const int lakeOffset = 2;
 
                     for (int x = lakeOffset; x < Room.Width - lakeOffset; x++)
-                    for (int y = lakeOffset; y < Room.Height - lakeOffset; y++)
-                        layout[y][x] = Item.Water;
+                        for (int y = lakeOffset; y < Room.Height - lakeOffset; y++)
+                            layout[y][x] = Item.Water;
 
                     break;
                 case Layout.Columns:
-                    const int columnOffset = 2 ; // TODO: change depending on size?
+                    const int columnOffset = 2;
 
                     // a chance to not add one of the columns
                     const double dontAddColumnChance = 0.2;
@@ -386,14 +386,16 @@ namespace Donjun
                             layout[^(columnOffset + 1)][^(columnOffset + 1)] = Item.Column;
                     }
 
-                    if (random.NextDouble() > dontAddColumnChance) layout[columnOffset][^(columnOffset + 1)] = Item.Column;
-                    if (random.NextDouble() > dontAddColumnChance) layout[^(columnOffset + 1)][columnOffset] = Item.Column;
+                    if (random.NextDouble() > dontAddColumnChance)
+                        layout[columnOffset][^(columnOffset + 1)] = Item.Column;
+                    if (random.NextDouble() > dontAddColumnChance)
+                        layout[^(columnOffset + 1)][columnOffset] = Item.Column;
                     break;
                 case Layout.Filled:
                     int fillOffset = 1;
                     for (int x = fillOffset; x < Room.Width - fillOffset; x++)
-                    for (int y = fillOffset; y < Room.Height - fillOffset; y++)
-                        layout[y][x] = Item.Wall;
+                        for (int y = fillOffset; y < Room.Height - fillOffset; y++)
+                            layout[y][x] = Item.Wall;
 
                     // a BFS will be run for the given number of steps to make the effect of a "hole" into the room
                     foreach ((int xe, int ye) in Room.Entrances)
@@ -444,6 +446,8 @@ namespace Donjun
             }
 
             // TODO: add items and enemies to the room
+            // TODO: smoother room corners:▖▗▘▝
+            // TODO: better use of https://www.alt-codes.net/circle-symbols and https://en.wikipedia.org/wiki/Box-drawing_character
 
             return layout;
         }

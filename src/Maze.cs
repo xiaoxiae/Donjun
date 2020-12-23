@@ -8,7 +8,7 @@ namespace Donjun
         Air = ' ',
         Wall = '█',
         Water = '~',
-        Column = 'o',
+        Column = '●',
         Nothing = '?',
     }
 
