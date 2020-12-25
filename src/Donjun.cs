@@ -25,10 +25,9 @@ namespace Donjun
                     var maze = rmg.Generate();
 
                     // print out the dungeon
-                    int offset = 1;
-                    for (int y = -offset; y < maze.Height + offset; y++)
+                    for (int y = -Constant.BorderThickness; y < maze.Height + Constant.BorderThickness; y++)
                     {
-                        for (int x = -offset; x < maze.Width + offset; x++)
+                        for (int x = -Constant.BorderThickness; x < maze.Width + Constant.BorderThickness; x++)
                             Console.Write((char) maze.At(x, y));
                         Console.WriteLine();
                     }

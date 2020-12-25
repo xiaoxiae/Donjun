@@ -36,18 +36,16 @@ namespace Donjun
         /// <param name="random">A random number generator.</param>
         private void RecursiveRoomSplit(Room current, RoomCollection rooms, Random random)
         {
-            const double recursionChance = 0.1; // the chance for the room to not split in two if of valid size
-            const double minimumSplitPortion = 0.3; // the minimum portion the smallest room can be after split
-
             // return only when the room is small enough and we don't want to make it any smaller
             if (current.Width < MaxRoomSide && current.Height < MaxRoomSide &&
-                random.NextDouble() < recursionChance)
+                random.NextDouble() > Constant.RoomSplitChance)
                 return;
 
             while (true)
             {
                 // number between minimumSplitPortion and (1 - minimumSplitPortion)
-                double splitPortion = random.NextDouble() * (1 - minimumSplitPortion * 2) + minimumSplitPortion;
+                double splitPortion = random.NextDouble() * (1 - Constant.RoomSplitPortion * 2) +
+                                      Constant.RoomSplitPortion;
 
                 (Room, Room)? pair = random.NextDouble() < 0.5
                     ? current.SplitHorizontally(splitPortion, RoomSpacing)
@@ -322,9 +320,9 @@ namespace Donjun
         }
     }
 
-    class RoomLayoutGenerator
+    public class RoomLayoutGenerator
     {
-        enum Layout
+        public enum Layout
         {
             Regular,
             // ########
@@ -370,6 +368,7 @@ namespace Donjun
             var layout = new List<List<Item>>();
             Random random = new Random();
 
+            // empty room, no walls
             for (int i = 0; i < Room.Height; i++)
             {
                 var list = new List<Item>();
@@ -379,32 +378,21 @@ namespace Donjun
                 layout.Add(list);
             }
 
-            var odds = new SortedDictionary<Layout, int>
-            {
-                {Layout.Regular, 15},
-                {Layout.Columns, 5},
-                {Layout.Lake, 2},
-                {Layout.Filled, 1},
-            };
-
             // get a random number from 0 to sum of values
             int total = 0;
-            foreach ((var key, var value) in odds)
+            foreach ((var key, var value) in Constant.RoomLayoutChance)
                 total += value;
             int picked = random.Next(0, total);
 
             // get the layout that corresponds to this random number
             Layout l = Layout.Regular;
             total = 0;
-            foreach ((var key, var value) in odds)
+            foreach ((var key, var value) in Constant.RoomLayoutChance)
             {
                 if (total <= picked)
                     l = key;
                 total += value;
             }
-
-            if (picked == 25)
-                Console.WriteLine("wow");
 
             // add walls (same for all rooms)
             for (int x = 0; x < Room.Width; x++)
@@ -448,44 +436,34 @@ namespace Donjun
                 case Layout.Regular: // do nothing extra
                     break;
                 case Layout.Lake:
-                    const int lakeOffset = 2;
-
-                    for (int x = lakeOffset; x < Room.Width - lakeOffset; x++)
-                        for (int y = lakeOffset; y < Room.Height - lakeOffset; y++)
+                    for (int x = Constant.LakeOffset; x < Room.Width - Constant.LakeOffset; x++)
+                        for (int y = Constant.LakeOffset; y < Room.Height - Constant.LakeOffset; y++)
                             layout[y][x] = Item.Water;
 
                     break;
                 case Layout.Columns:
-                    const int columnOffset = 2;
-
-                    // a chance to not add one of the columns
-                    const double dontAddColumnChance = 0.2;
-
                     // if the columns would be touching, only add the diagonal ones
-                    if (!(Room.Width <= columnOffset * 2 + 2 || Room.Height <= columnOffset * 2 + 2))
+                    if (!(Room.Width <= Constant.ColumnOffset * 2 + 2 || Room.Height <= Constant.ColumnOffset * 2 + 2))
                     {
-                        if (random.NextDouble() > dontAddColumnChance) layout[columnOffset][columnOffset] = Item.Column;
-                        if (random.NextDouble() > dontAddColumnChance)
-                            layout[^(columnOffset + 1)][^(columnOffset + 1)] = Item.Column;
+                        if (random.NextDouble() > Constant.OmitColumnChance)
+                            layout[Constant.ColumnOffset][Constant.ColumnOffset] = Item.Column;
+                        if (random.NextDouble() > Constant.OmitColumnChance)
+                            layout[^(Constant.ColumnOffset + 1)][^(Constant.ColumnOffset + 1)] = Item.Column;
                     }
 
-                    if (random.NextDouble() > dontAddColumnChance)
-                        layout[columnOffset][^(columnOffset + 1)] = Item.Column;
-                    if (random.NextDouble() > dontAddColumnChance)
-                        layout[^(columnOffset + 1)][columnOffset] = Item.Column;
+                    if (random.NextDouble() > Constant.OmitColumnChance)
+                        layout[Constant.ColumnOffset][^(Constant.ColumnOffset + 1)] = Item.Column;
+                    if (random.NextDouble() > Constant.OmitColumnChance)
+                        layout[^(Constant.ColumnOffset + 1)][Constant.ColumnOffset] = Item.Column;
                     break;
                 case Layout.Filled:
-                    int fillOffset = 1;
-                    for (int x = fillOffset; x < Room.Width - fillOffset; x++)
-                        for (int y = fillOffset; y < Room.Height - fillOffset; y++)
+                    for (int x = Constant.FillOffset; x < Room.Width - Constant.FillOffset; x++)
+                        for (int y = Constant.FillOffset; y < Room.Height - Constant.FillOffset; y++)
                             layout[y][x] = Item.Wall;
 
                     // a BFS will be run for the given number of steps to make the effect of a "hole" into the room
                     foreach ((int xe, int ye) in Room.Entrances)
                     {
-                        int fillSteps = random.Next(2, 5);
-                        double ignoreDirectionChange = 0.1;
-
                         var explored = new HashSet<(int, int)>();
                         explored.Add((xe - Room.X, ye - Room.Y));
 
@@ -496,6 +474,7 @@ namespace Donjun
                         {
                             (int x, int y, int d) = queue.Dequeue();
 
+                            int fillSteps = random.Next(Constant.MinFillSteps, Constant.MaxFillSteps);
                             if (d > fillSteps)
                                 break;
 
@@ -511,11 +490,11 @@ namespace Donjun
 
                                 explored.Add((xn, yn));
 
-                                if (xn >= fillOffset
-                                    && yn >= fillOffset
-                                    && xn < Room.Width - fillOffset
-                                    && yn < Room.Height - fillOffset
-                                    && random.NextDouble() > ignoreDirectionChange)
+                                if (xn >= Constant.FillOffset
+                                    && yn >= Constant.FillOffset
+                                    && xn < Room.Width - Constant.FillOffset
+                                    && yn < Room.Height - Constant.FillOffset
+                                    && random.NextDouble() > Constant.OmitDirectionStepChance)
                                 {
                                     queue.Enqueue((xn, yn, d + 1));
                                 }

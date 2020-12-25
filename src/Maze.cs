@@ -3,10 +3,14 @@ namespace Donjun
     /// <summary>
     /// An item(-ASCII) enum for visualizing things in the dungeon.
     /// </summary>
-    enum Item
+    public enum Item
     {
         Air = ' ',
         Wall = '█',
+        LUWallCorner = '▘',
+        RUWallCorner = '▝',
+        LDWallCorner = '▖',
+        RDWallCorner = '▗',
         Water = '~',
         Column = '●',
         Nothing = '?',

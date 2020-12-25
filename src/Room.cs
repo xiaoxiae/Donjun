@@ -7,7 +7,7 @@ namespace Donjun
     /// <summary>
     /// A single room in the maze.
     /// </summary>
-    class Room : IBoundable, IAttable
+    public class Room : IBoundable, IAttable
     {
         private Rectangle _room; // internally stored as a rectangle
         public List<(int, int)> Entrances; // entrances to the room
