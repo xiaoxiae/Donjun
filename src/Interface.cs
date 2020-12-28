@@ -19,7 +19,7 @@ namespace Donjun
     }
 
     /// <summary>
-    /// An interface for a maze. It has to both have given bounds and return items at the given positions.
+    /// An interface for a dungeon. It has to both have given bounds and return items at the given positions.
     /// </summary>
-    interface IMaze : IAttable, IBoundable { }
+    interface IDungeon : IAttable, IBoundable { }
 }

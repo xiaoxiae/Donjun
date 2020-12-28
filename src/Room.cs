@@ -5,7 +5,7 @@ using System.Drawing;
 namespace Donjun
 {
     /// <summary>
-    /// A single room in the maze.
+    /// A single room in the dungeon.
     /// </summary>
     public class Room : IBoundable, IAttable
     {

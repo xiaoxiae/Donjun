@@ -11,10 +11,10 @@ namespace Donjun
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(options =>
                 {
-                    var rmg = new MazeGenerator
+                    var rmg = new DungeonGenerator
                     {
-                        MazeWidth = options.Width,
-                        MazeHeight = options.Height,
+                        Width = options.Width,
+                        Height = options.Height,
                         MinRoomSide = options.MinRoomSide,
                         MaxRoomSide = options.MaxRoomSide,
                         RoomSpacing = options.RoomSpacing,
@@ -26,14 +26,14 @@ namespace Donjun
                     
                     Random random = options.Seed.HasValue ? new Random(options.Seed.Value) : new Random();
 
-                    // generate the maze
-                    var maze = rmg.Generate(random);
+                    // generate the dungeon
+                    var dungeon = rmg.Generate(random);
 
                     // print out the dungeon, with some border offset
-                    for (int y = -Constant.BorderThickness; y < maze.Height + Constant.BorderThickness; y++)
+                    for (int y = -Constant.BorderThickness; y < dungeon.Height + Constant.BorderThickness; y++)
                     {
-                        for (int x = -Constant.BorderThickness; x < maze.Width + Constant.BorderThickness; x++)
-                            Console.Write((char) maze.At(x, y));
+                        for (int x = -Constant.BorderThickness; x < dungeon.Width + Constant.BorderThickness; x++)
+                            Console.Write((char) dungeon.At(x, y));
                         Console.WriteLine();
                     }
                 });

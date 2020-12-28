@@ -18,12 +18,12 @@ namespace Donjun
         Nothing = '?',
     }
 
-    class Maze : IMaze
+    class Dungeon : IDungeon
     {
         private Path _path;
         private RoomCollection _roomCollection;
 
-        public Maze(RoomCollection roomCollection, Path path)
+        public Dungeon(RoomCollection roomCollection, Path path)
         {
             _roomCollection = roomCollection;
             _path = path;
@@ -40,8 +40,14 @@ namespace Donjun
             return Item.Wall;
         }
 
+        /// <summary>
+        /// Return the width of the dungeon.
+        /// </summary>
         public int Width => _roomCollection.Width;
 
+        /// <summary>
+        /// Return the height of the dungeon.
+        /// </summary>
         public int Height => _roomCollection.Height;
     }
 }

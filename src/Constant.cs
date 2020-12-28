@@ -12,7 +12,7 @@ namespace Donjun
         public static readonly (int, int)[] DiagonalDeltas =
             {(0, 1), (1, 0), (-1, 0), (0, -1), (-1, -1), (1, 1), (-1, 1), (1, -1)};
 
-        public const int BorderThickness = 1; // thickness of the wall around the maze
+        public const int BorderThickness = 1; // thickness of the wall around the dungeon
 
         // ROOM COLLECTION GENERATION
         public const double RoomSplitChance = 0.9; // the chance for a room to not split in half if of valid size

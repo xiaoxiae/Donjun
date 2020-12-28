@@ -8,8 +8,8 @@ namespace Donjun
     /// </summary>
     class RoomCollectionGenerator
     {
-        public int MazeWidth { get; set; }
-        public int MazeHeight { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public int MinRoomSide { get; set; }
         public int MaxRoomSide { get; set; }
         public int RoomSpacing { get; set; }
@@ -20,10 +20,10 @@ namespace Donjun
         /// <param name="random"></param>
         public RoomCollection Generate(Random random)
         {
-            var rooms = new RoomCollection(MazeWidth, MazeHeight);
+            var rooms = new RoomCollection(Width, Height);
 
             // create one big room
-            var starting = new Room(0, 0, MazeWidth, MazeHeight);
+            var starting = new Room(0, 0, Width, Height);
             rooms.AddRoom(starting);
 
             // split it recursively
@@ -288,7 +288,7 @@ namespace Donjun
         }
 
         /// <summary>
-        /// Generate the path between the rooms in the maze.
+        /// Generate the path between the rooms in the dungeon.
         /// 
         /// The algorithm works as follows:
         /// (1) mark all points that are the same distance to more than one room to be on the path
@@ -550,12 +550,12 @@ namespace Donjun
     }
 
     /// <summary>
-    /// A generator for a maze, combining multiple generators.
+    /// A generator for a dungeon, combining multiple generators.
     /// </summary>
-    class MazeGenerator
+    class DungeonGenerator
     {
-        public int MazeWidth { get; set; }
-        public int MazeHeight { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public int MinRoomSide { get; set; }
         public int MaxRoomSide { get; set; }
         public int RoomSpacing { get; set; }
@@ -565,21 +565,21 @@ namespace Donjun
         public double LootChance { get; set; }
 
         /// <summary>
-        /// Generate the maze.
+        /// Generate the dungeon.
         /// 
         /// The algorithm works as follows:
-        /// (1) generate rectangular areas where the rooms are going to be
-        /// (2) connect these areas via paths and let them know where the entrances are (for generating the rooms)
-        /// (3) generate unique rooms in each of the rectangular areas
+        /// 1. generate rectangular areas where the rooms are going to be
+        /// 2. connect these areas via paths and let them know where the entrances are (for generating the rooms)
+        /// 3. generate unique rooms in each of the rectangular areas
         /// </summary>
         /// <param name="random"></param>
-        public IMaze Generate(Random random)
+        public IDungeon Generate(Random random)
         {
             // (1) generate rooms
             RoomCollection roomCollection = new RoomCollectionGenerator
             {
-                MazeWidth = MazeWidth,
-                MazeHeight = MazeHeight,
+                Width = Width,
+                Height = Height,
                 MinRoomSide = MinRoomSide,
                 MaxRoomSide = MaxRoomSide,
                 RoomSpacing = RoomSpacing
@@ -604,7 +604,7 @@ namespace Donjun
                 }.Generate(random));
             }
 
-            return new Maze(roomCollection, path);
+            return new Dungeon(roomCollection, path);
         }
     }
 }

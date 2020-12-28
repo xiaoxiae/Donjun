@@ -8,10 +8,10 @@ namespace Donjun
 
     class Options
     {
-        [Option('w', "width", Default = 50, HelpText = "The width of the generated maze.")]
+        [Option('w', "width", Default = 50, HelpText = "The width of the generated dungeon.")]
         public int Width { get; set; }
 
-        [Option('h', "height", Default = 50, HelpText = "The height of the generated maze.")]
+        [Option('h', "height", Default = 50, HelpText = "The height of the generated dungeon.")]
         public int Height { get; set; }
 
         [Option("min-room-side", Default = 6, HelpText = "The minimum width/height a room can have.")]
