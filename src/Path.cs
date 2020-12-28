@@ -7,7 +7,7 @@ namespace Donjun
     /// </summary>
     class Path : IAttable
     {
-        private HashSet<(int, int)> _pathPoints = new HashSet<(int, int)>();
+        private readonly HashSet<(int, int)> _pathPoints = new HashSet<(int, int)>();
 
         /// <summary>
         /// Return empty if the given coordinate is on a path, else return a wall.
@@ -23,15 +23,12 @@ namespace Donjun
         }
 
         /// <summary>
-        /// Remove a point from the path.
+        /// Remove a point from the path, returning <value>true</value> if it was there and <value>false</value> if not.
         /// </summary>
-        public void Remove(int x, int y)
-        {
-            _pathPoints.Remove((x, y));
-        }
+        public bool Remove(int x, int y) => _pathPoints.Remove((x, y));
 
         /// <summary>
-        /// Return true if the path contains a point.
+        /// Return <value>true</value> if the path contains a point, else <value>false</value>.
         /// </summary>
         public bool Contains(int x, int y) => _pathPoints.Contains((x, y));
     }

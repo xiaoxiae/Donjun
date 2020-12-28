@@ -20,11 +20,16 @@ namespace Donjun
                         RoomSpacing = options.RoomSpacing,
                         MinRoomEntrances = options.MinRoomEntrances,
                         MaxRoomEntrances = options.MaxRoomEntrances,
+                        EnemyChance = options.EnemyChance,
+                        LootChance = options.LootChance,
                     };
+                    
+                    Random random = options.Seed.HasValue ? new Random(options.Seed.Value) : new Random();
 
-                    var maze = rmg.Generate();
+                    // generate the maze
+                    var maze = rmg.Generate(random);
 
-                    // print out the dungeon
+                    // print out the dungeon, with some border offset
                     for (int y = -Constant.BorderThickness; y < maze.Height + Constant.BorderThickness; y++)
                     {
                         for (int x = -Constant.BorderThickness; x < maze.Width + Constant.BorderThickness; x++)

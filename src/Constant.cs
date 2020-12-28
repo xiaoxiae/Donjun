@@ -5,9 +5,8 @@ namespace Donjun
     /// <summary>
     /// A class for various algorithm-related constants that aren't meant to be tweaked by the user.
     /// </summary>
-    public class Constant
+    public static class Constant
     {
-        // GENERAL
         public static readonly (int, int)[] ManhattanDeltas = {(0, 1), (1, 0), (-1, 0), (0, -1)};
 
         public static readonly (int, int)[] DiagonalDeltas =
@@ -28,7 +27,7 @@ namespace Donjun
                 {RoomLayoutGenerator.Layout.Regular, 15},
                 {RoomLayoutGenerator.Layout.Columns, 5},
                 {RoomLayoutGenerator.Layout.Lake, 2},
-                {RoomLayoutGenerator.Layout.Filled, 1},
+                {RoomLayoutGenerator.Layout.Filled, 2},
             };
         
         // offset of lake/columns/fill from the corner of a room
@@ -43,5 +42,9 @@ namespace Donjun
         public const double OmitDirectionStepChance = 0.1;  // the chance to not expand the BFS in the given direction
         public const int MinFillSteps = 2;
         public const int MaxFillSteps = 5;
+        
+        // the chance to add corners to all possible places in the room
+        public const double RoomCornersChance = 0.8;
+        
     }
 }

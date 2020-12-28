@@ -117,7 +117,6 @@ namespace Donjun
         /// <summary>
         /// Return the item in the room.
         /// Note that x and y are relative to the position of the room.
-        /// TODO: throw if out of bounds, since this shouldn't happen
         /// </summary>
         public Item At(int x, int y)
         {
@@ -126,7 +125,6 @@ namespace Donjun
 
         /// <summary>
         /// Set the layout of the room.
-        /// TODO: check size
         /// </summary>
         public void SetLayout(List<List<Item>> layout)
         {
@@ -148,8 +146,6 @@ namespace Donjun
         /// The boundary in which all rooms have to reside.
         /// </summary>
         public Rectangle Boundary { get; }
-
-        // the minimum number of empty spaces between each of the rooms
 
         public RoomCollection(int width, int height)
         {

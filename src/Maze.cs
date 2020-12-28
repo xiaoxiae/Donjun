@@ -11,6 +11,8 @@ namespace Donjun
         RUWallCorner = '▝',
         LDWallCorner = '▖',
         RDWallCorner = '▗',
+        Enemies = 'E',
+        Loot = 'L',
         Water = '~',
         Column = '●',
         Nothing = '?',

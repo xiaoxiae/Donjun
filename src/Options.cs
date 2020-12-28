@@ -14,7 +14,7 @@ namespace Donjun
         [Option('h', "height", Default = 50, HelpText = "The height of the generated maze.")]
         public int Height { get; set; }
 
-        [Option("min-room-side", Default = 5, HelpText = "The minimum width/height a room can have.")]
+        [Option("min-room-side", Default = 6, HelpText = "The minimum width/height a room can have.")]
         public int MinRoomSide { get; set; }
 
         [Option("max-room-side", Default = 20, HelpText = "The maximum width/height a room can have.")]
@@ -28,5 +28,14 @@ namespace Donjun
 
         [Option("max-room-entrances", Default = 2, HelpText = "The maximum number of entrances a room can have.")]
         public int MaxRoomEntrances { get; set; }
+        
+        [Option("seed", HelpText = "A specific random number generator seed.")]
+        public int? Seed { get; set; }
+        
+        [Option("loot-chance", Default = 0.33, HelpText = "The chance for a regular room to contain loot.")]
+        public double LootChance { get; set; }
+        
+        [Option("enemy-chance", Default  = 0.2, HelpText = "The chance for a regular room to contain enemies.")]
+        public double EnemyChance { get; set; }
     }
 }
