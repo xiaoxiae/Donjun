@@ -198,7 +198,7 @@ namespace Donjun
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public Room? RoomAt(int x, int y)
+        public Room RoomAt(int x, int y)
         {
             var room = new Room(x, y, 1, 1);
 

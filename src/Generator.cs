@@ -328,7 +328,7 @@ namespace Donjun
     /// </summary>
     public class RoomLayoutGenerator
     {
-        public enum Layout
+        public enum LayoutType
         {
             Regular,
             // ########
@@ -372,7 +372,34 @@ namespace Donjun
         public double EnemiesInRoomChance { get; set; }
         public double LootInRoomChance { get; set; }
 
-        public List<List<Item>> Generate(Random random)
+        /// <summary>
+        /// Return a random layout type.
+        /// </summary>
+        private LayoutType GetRandomLayout(Random random)
+        {
+            // get a random number from 0 to sum of values
+            int total = 0;
+            foreach ((var key, var value) in Constant.RoomLayoutChance)
+                total += value;
+            int picked = random.Next(0, total);
+
+            // get the layout that corresponds to this random number
+            LayoutType layoutType = LayoutType.Regular;
+            total = 0;
+            foreach ((var key, var value) in Constant.RoomLayoutChance)
+            {
+                if (total <= picked)
+                    layoutType = key;
+                total += value;
+            }
+
+            return layoutType;
+        }
+
+        /// <summary>
+        /// Return an empty room, with walls and empty tiles where entrances should be.
+        /// </summary>
+        private List<List<Item>> GetEmptyRoom(Random random)
         {
             var layout = new List<List<Item>>();
 
@@ -384,22 +411,6 @@ namespace Donjun
                     list.Add(Item.Air);
 
                 layout.Add(list);
-            }
-
-            // get a random number from 0 to sum of values
-            int total = 0;
-            foreach ((var key, var value) in Constant.RoomLayoutChance)
-                total += value;
-            int picked = random.Next(0, total);
-
-            // get the layout that corresponds to this random number
-            Layout l = Layout.Regular;
-            total = 0;
-            foreach ((var key, var value) in Constant.RoomLayoutChance)
-            {
-                if (total <= picked)
-                    l = key;
-                total += value;
             }
 
             // add walls (same for all rooms)
@@ -424,46 +435,61 @@ namespace Donjun
                 layout[y][x] = Item.Air;
             }
 
+            return layout;
+        }
+
+        /// <summary>
+        /// Add corners to the layout (if they don't block an entrance).
+        /// </summary>
+        void AddRoomCorners(List<List<Item>> layout)
+        {
+            // for each corner
+            foreach ((int x, int y) in new[]
+                {(0, 0), (0, Room.Height - 1), (Room.Width - 1, 0), (Room.Width - 1, Room.Height - 1)})
+            {
+                // check if there are walls all around
+                bool allWalls = true;
+                foreach ((int xd, int yd) in Constant.ManhattanDeltas)
+                {
+                    int xn = x + xd, yn = y + yd;
+
+                    if (xn >= 0 && yn >= 0 && xn < Room.Width && yn < Room.Height && layout[yn][xn] != Item.Wall)
+                        allWalls = false;
+                }
+
+                if (!allWalls) continue;
+
+                if ((x, y) == (0, 0)) layout[1][1] = Item.LUWallCorner;
+                else if ((x, y) == (0, Room.Height - 1)) layout[^2][1] = Item.LDWallCorner;
+                else if ((x, y) == (Room.Width - 1, 0)) layout[1][^2] = Item.RUWallCorner;
+                else if ((x, y) == (Room.Width - 1, Room.Height - 1)) layout[^2][^2] = Item.RDWallCorner;
+            }
+        }
+
+        public List<List<Item>> Generate(Random random)
+        {
+            List<List<Item>> layout = GetEmptyRoom(random);
+
             // possibly add corners, if room entrances aren't in the corners
             if (random.NextDouble() < Constant.RoomCornersChance)
-            {
-                // for each corner
-                foreach ((int x, int y) in new[]
-                    {(0, 0), (0, Room.Height - 1), (Room.Width - 1, 0), (Room.Width - 1, Room.Height - 1)})
-                {
-                    // check if there are walls all around
-                    bool allWalls = true;
-                    foreach ((int xd, int yd) in Constant.ManhattanDeltas)
-                    {
-                        int xn = x + xd, yn = y + yd;
+                AddRoomCorners(layout);
 
-                        if (xn >= 0 && yn >= 0 && xn < Room.Width && yn < Room.Height && layout[yn][xn] != Item.Wall)
-                            allWalls = false;
-                    }
-
-                    if (!allWalls) continue;
-
-                    if ((x, y) == (0, 0)) layout[1][1] = Item.LUWallCorner;
-                    else if ((x, y) == (0, Room.Height - 1)) layout[^2][1] = Item.LDWallCorner;
-                    else if ((x, y) == (Room.Width - 1, 0)) layout[1][^2] = Item.RUWallCorner;
-                    else if ((x, y) == (Room.Width - 1, Room.Height - 1)) layout[^2][^2] = Item.RDWallCorner;
-                }
-            }
+            LayoutType layoutType = GetRandomLayout(random);
 
             // generate the layout
-            switch (l)
+            switch (layoutType)
             {
-                case Layout.Regular:
+                case LayoutType.Regular:
                     // do nothing extra
                     break;
-                case Layout.Lake:
+                case LayoutType.Lake:
                     // fill the center with a lake
                     for (int x = Constant.LakeOffset; x < Room.Width - Constant.LakeOffset; x++)
                     for (int y = Constant.LakeOffset; y < Room.Height - Constant.LakeOffset; y++)
                         layout[y][x] = Item.Water;
 
                     break;
-                case Layout.Columns:
+                case LayoutType.Columns:
                     // if the columns would be touching, only add the diagonal ones
                     if (!(Room.Width <= Constant.ColumnOffset * 2 + 2 || Room.Height <= Constant.ColumnOffset * 2 + 2))
                     {
@@ -478,12 +504,12 @@ namespace Donjun
                     if (random.NextDouble() > Constant.OmitColumnChance)
                         layout[^(Constant.ColumnOffset + 1)][Constant.ColumnOffset] = Item.Column;
                     break;
-                case Layout.Filled:
+                case LayoutType.Filled:
                     for (int x = Constant.FillOffset; x < Room.Width - Constant.FillOffset; x++)
                     for (int y = Constant.FillOffset; y < Room.Height - Constant.FillOffset; y++)
                         layout[y][x] = Item.Wall;
 
-                    // a BFS will be run for the given number of steps to make the effect of a "hole" into the room
+                    // run a BFS
                     foreach ((int xe, int ye) in Room.Entrances)
                     {
                         var explored = new HashSet<(int, int)>();
@@ -495,10 +521,6 @@ namespace Donjun
                         while (queue.Count != 0)
                         {
                             (int x, int y, int d) = queue.Dequeue();
-
-                            int fillSteps = random.Next(Constant.MinFillSteps, Constant.MaxFillSteps);
-                            if (d > fillSteps)
-                                break;
 
                             layout[y][x] = Item.Air;
 
@@ -512,11 +534,13 @@ namespace Donjun
 
                                 explored.Add((xn, yn));
 
+                                // only explore in this direction with a certain chance that gets smaller the further
+                                // the BFS runs
                                 if (xn >= Constant.FillOffset
                                     && yn >= Constant.FillOffset
                                     && xn < Room.Width - Constant.FillOffset
                                     && yn < Room.Height - Constant.FillOffset
-                                    && random.NextDouble() > Constant.OmitDirectionStepChance)
+                                    && random.NextDouble() < Math.Pow(Constant.DirectionStepChance, d))
                                 {
                                     queue.Enqueue((xn, yn, d + 1));
                                 }
@@ -528,17 +552,12 @@ namespace Donjun
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            var emptyTiles = new List<(int, int)>();
-
-            for (int x = 1; x < Room.Width - 1; x++)
-            for (int y = 1; y < Room.Height - 1; y++)
-                if (layout[y][x] == Item.Air)
-                    emptyTiles.Add((x, y));
-
+            
             // possibly mark a room as containing enemies/loot
-            bool enemies = random.NextDouble() < EnemiesInRoomChance && l != Layout.Filled && l != Layout.Lake;
-            bool loot = random.NextDouble() < LootInRoomChance && l != Layout.Filled && l != Layout.Lake;
+            bool enemies = random.NextDouble() < EnemiesInRoomChance && layoutType != LayoutType.Filled &&
+                           layoutType != LayoutType.Lake;
+            bool loot = random.NextDouble() < LootInRoomChance && layoutType != LayoutType.Filled &&
+                        layoutType != LayoutType.Lake;
 
             int offset = 0;
             // +1s because left and top-align

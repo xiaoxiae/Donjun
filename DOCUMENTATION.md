@@ -27,7 +27,6 @@ Here is the purpose of each of the files of the project:
 - `Path.cs` - contains the implementation of the Path class
 - `Room.cs` - contains the implementation of the Room class
 
-
 ## Future development
 I'm pretty happy with the current state of the project, so unless there is interest in further development from the users, it will stay this way (modulo bugfixes).
 
